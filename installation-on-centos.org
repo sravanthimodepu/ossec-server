@@ -18,15 +18,18 @@
   - OSSEC is composed of multiple pieces. It has a central manager for
     monitoring and receiving information from agents, syslog,
     databases, and from agentless devices.
+
 ** Manager (or Server)
-   - The manager is the central piece of the OSSEC deployment. It
-     stores the file integrity checking databases, the logs, events,
-     and system auditing entries. All the rules, decoders, and major
-     configuration options are stored centrally in the manager; making
-     it easy to administer even a large number of agents.
+   - The manager or server is the central piece of the OSSEC
+     deployment. It stores the file integrity checking databases, the
+     logs, events, and system auditing entries. All the rules,
+     decoders, and major configuration options are stored centrally in
+     the manager; making it easy to administer even a large number of
+     agents.
 
    - Agents connect to the server on port 1514/udp. Communication to this
      port must be allowed for agents to communicate with the server.
+
 ** Agents
    - The agent is a small program, or collection of programs,
      installed on the systems to be monitored. The agent will collect
@@ -39,32 +42,38 @@
      during the installation) and inside a chroot jail isolated from the
      system. Most of the agent configuration can be pushed from the
      manager.
+
 ** Agentless
    - For systems that an agent cannot be installed on, the agentless
      support may allow integrity checks to be performed. Agentless
      scans can be used to monitor firewalls, routers, and even Unix
      systems.
+
 ** Virtualization/VMware
    - OSSEC allows you to install the agent on the guest operating
      systems. It may also be installed inside some versions of VMWare
-     ESX, but this may cause support issues. With the agent installed
-     inside VMware ESX you can get alerts about when a VM guest is
-     being installed, removed, started, etc. It also monitors logins,
-     logouts and errors inside the ESX server. In addition to that,
-     OSSEC performs the Center for Internet Security (CIS) checks for
-     VMware, alerting if there is any insecure configuration option
-     enabled or any other issue.
+     ESX, but this may cause support issues. 
+   - With the agent installed inside VMware ESX you can get alerts
+     about when a VM guest is being installed, removed, started,
+     etc. It also monitors logins, logouts and errors inside the ESX
+     server. 
+   - In addition to that, OSSEC performs the Center for
+     Internet Security (CIS) checks for VMware, alerting if there is
+     any insecure configuration option enabled or any other issue.
+
 ** Firewalls, switches and routers
    - OSSEC can receive and analyze syslog events from a large variety
      of firewalls, switches and routers. It supports all Cisco
      routers, Cisco PIX, Cisco FWSM, Cisco ASA, Juniper Routers,
      Netscreen firewall, Checkpoint and many others.
+
 ** Architecture
    - This diagram shows the central manager receiving events from the
      agents and system logs from remote devices. When something is
      detected, active responses can be executed and the admin is
      notified.
    - [[images/ossec-arch.jpg][Image]]
+
 ** Pre-requisites
    - Two centos6 Droplets. Make sure to take note of the IP
      addresses of both. We'll refer to these as server_ip and
@@ -72,9 +81,8 @@
    - A sudo non-root user on both Droplets.
    - Iptables firewall enabled on both. In Linux, the latest stable
      release of OSSEC needs iptables for its active response
-     feature. Follow the instructions on How To Set Up
-     a Firewall Using Iptables on Centos 6 to set up iptables on
-     both servers.
+     feature. 
+     
 *** Firewalls and Iptables
     *Firewalls*
     - A firewall is a system designed to prevent unauthorized access to or
@@ -87,9 +95,13 @@
       the local network to which you are connected) must pass through
       the firewall, which examines each message and blocks those that
       do not meet the specified security criteria.
-#+BEGIN_EXAMPLE
-yum install system-config-firewall*
-#+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+  yum install system-config-firewall*
+  #+END_EXAMPLE
+    - Follow the instructions on How To Set Up
+      a Firewall Using Iptables on Centos 6 to set up iptables on
+      both servers.
+
     *Iptables*
     - iptables is a user-space utility program that allows a system
       administrator to configure the tables[2] provided by the Linux
@@ -98,41 +110,44 @@ yum install system-config-firewall*
       programs are currently used for different protocols; iptables
       applies to IPv4, ip6tables to IPv6, arptables to ARP, and
       ebtables to Ethernet frames.
-#+BEGIN_EXAMPLE
-yum install iptables.x86_64
-#+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+  yum install iptables.x86_64 
+  #+END_EXAMPLE
+
 * Creating containers for both server and client
     *Steps to create Containers on both server and client are same*
     - Login to base4 and create a container as follows:
       + Open terminal with below command by pressing *ctrl+alt+t*.
       + Use below command to login to the base4
-	#+BEGIN_EXAMPLE
-	ssh user@10.4.12.24
-	#+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+  ssh user@10.4.12.24
+  #+END_EXAMPLE
       + It awill ask for the password, then sitch to root as below:
-	#+BEGIN_EXAMPLE
-	sudo su
-	#+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+  sudo su
+  #+END_EXAMPLE
       + Create a container with the below command:
 	1. for server
-	   #+BEGIN_EXAMPLE
-	   vzctl create 31 --ostemplate centos-6.9-x86_64-with-emacs --diskspace 20G:25.0G --hostname server.vlabs.ac.in --ipadd 10.4.12.31
-	   #+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+   vzctl create 31 --ostemplate centos-6.9-x86_64-with-emacs --diskspace 20G:25.0G --hostname server.vlabs.ac.in --ipadd 10.4.12.31
+  #+END_EXAMPLE
         2. Start and enter in to the container as follows:
-	   #+BEGIN_EXAMPLE
-	   vzctl start 31
-           vzctl enter 31
-	   #+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+  vzctl start 31
+  vzctl enter 31
+  #+END_EXAMPLE
         3. for client
-	   #+BEGIN_EXAMPLE
-	   vzctl create 40 --ostemplate centos-6.9-x86_64-with-emacs --diskspace 20G:25.0G --hostname client.vlabs.ac.in --ipadd 10.4.12.40
-	   #+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+  vzctl create 40 --ostemplate centos-6.9-x86_64-with-emacs --diskspace 20G:25.0G --hostname client.vlabs.ac.in --ipadd 10.4.12.40
+  #+END_EXAMPLE
         4. Start and enter in to the container as follows:
-	   #+BEGIN_EXAMPLE
-	   vzctl start 31
-           vzctl enter 31
-	   #+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+  vzctl start 31
+  vzctl enter 31
+  #+END_EXAMPLE
+
 * Installation and configuration of OSSEC on server
+
 ** Steps to install and configure OSSEC on server and client
    - Log into the server and client containers and update using the below command:
      #+BEGIN_EXAMPLE
@@ -179,6 +194,7 @@ yum install iptables.x86_64
      scripts and OSSEC configurations file.
    - Press “Enter” to finish the OSSEC Client/Agent installation part.
    - Now Client/Agent side installation is done.
+
 ** Connecting Server and Agent
 *** Server Side Configuration
     - Adding a client :- Follow the below command to add client.
