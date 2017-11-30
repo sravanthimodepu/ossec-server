@@ -65,3 +65,106 @@
      detected, active responses can be executed and the admin is
      notified.
    - [[images/ossec-arch.jpg][Image]]
+** Pre-requisites
+   - Two centos6 Droplets. Make sure to take note of the IP
+     addresses of both. We'll refer to these as server_ip and
+     agent_ip, respectively.
+   - A sudo non-root user on both Droplets.
+   - Iptables firewall enabled on both. In Linux, the latest stable
+     release of OSSEC needs iptables for its active response
+     feature. Follow the instructions on How To Set Up
+     a Firewall Using Iptables on Centos 6 to set up iptables on
+     both servers.
+*** Firewalls and Iptables
+    *Firewalls*
+    - A firewall is a system designed to prevent unauthorized access to or
+      from a private network. You can implement a firewall in either
+      hardware or software form, or a combination of both. 
+    - Firewalls prevent unauthorized Internet users from accessing
+      private networks connected to the Internet, especially
+      intranets. 
+    - All messages entering or leaving the intranet (i.e.,
+      the local network to which you are connected) must pass through
+      the firewall, which examines each message and blocks those that
+      do not meet the specified security criteria.
+#+BEGIN_EXAMPLE
+yum install system-config-firewall*
+#+END_EXAMPLE
+    *Iptables*
+    - iptables is a user-space utility program that allows a system
+      administrator to configure the tables[2] provided by the Linux
+      kernel firewall (implemented as different Netfilter modules) and
+      the chains and rules it stores. Different kernel modules and
+      programs are currently used for different protocols; iptables
+      applies to IPv4, ip6tables to IPv6, arptables to ARP, and
+      ebtables to Ethernet frames.
+#+BEGIN_EXAMPLE
+yum install iptables.x86_64
+#+END_EXAMPLE
+** Installation and configuration of OSSEC on server
+*** Creating containers for both server and client
+    *Steps to create Containers on both server and client are same*
+    - Login to base4 and create a container as follows:
+      - Open terminal with below command by pressing *ctrl+alt+t*.
+      - Use below command to login to the base4
+	#+BEGIN_EXAMPLE
+	ssh user@10.4.12.24
+	#+END_EXAMPLE
+      - It awill ask for the password, then sitch to root as below:
+	#+BEGIN_EXAMPLE
+	sudo su
+	#+END_EXAMPLE
+      - Create a container with the below command:
+	- for server
+	  #+BEGIN_EXAMPLE
+	  vzctl create 31 --ostemplate centos-6.9-x86_64-with-emacs --diskspace 20G:25.0G --hostname server.vlabs.ac.in --ipadd 10.4.12.31
+	  #+END_EXAMPLE
+        - Start and enter in to the container as follows:
+	  #+BEGIN_EXAMPLE
+	  vzctl start 31
+          vzctl enter 31
+	  #+END_EXAMPLE
+        - for client
+	  #+BEGIN_EXAMPLE
+	  vzctl create 40 --ostemplate centos-6.9-x86_64-with-emacs --diskspace 20G:25.0G --hostname client.vlabs.ac.in --ipadd 10.4.12.40
+	  #+END_EXAMPLE
+        - Start and enter in to the container as follows:
+	  #+BEGIN_EXAMPLE
+	  vzctl start 31
+          vzctl enter 31
+	  #+END_EXAMPLE
+** Steps to install and configure OSSEC on server and client
+   - Log into the server and client containers and update using the below command:
+     #+BEGIN_EXAMPLE
+     yum update
+     #+END_EXAMPLE
+   - Installation of OSSEC involves some compiling, so install gcc
+     and make. Instead of installing both, install a single
+     package called build-essential with the below command:
+     #+BEGIN_EXAMPLE
+     install build-essential inotify-tools
+     #+END_EXAMPLE
+   - The latest server edition of OSSEC is version 2.8.1. To download
+     it, type:
+     #+BEGIN_EXAMPLE
+     wget -U ossec http://www.ossec.net/files/ossec-hids-2.8.1.tar.gz
+     #+END_EXAMPLE
+   - To download the checksum file, type:
+     #+BEGIN_EXAMPLE
+     wget -U ossec http://www.ossec.net/files/ossec-hids-2.8.1-checksum.txt
+     #+END_EXAMPLE
+   - To untar the downloaded ossec-hids-2.8.1.tar.gz, type:
+     #+BEGIN_EXAMPLE
+     tar -xvf ossec-hids-2.8.1.tar.gz
+     #+END_EXAMPLE
+   - It extracts all the files to ossec-hids-2.8.1
+   - Change directory to ossec-hids-2.8.1, type:
+     #+BEGIN_EXAMPLE
+     cd ossec-hids-2.8.1
+     #+END_EXAMPLE
+   - It list all the files in the ossec-hids-2.8.1
+   - Run below command to install ossec
+     #+BEGIN_EXAMPLE
+     ./install.sh
+     #+END_EXAMPLE
+   - Select language, default is Emglish: hit enter
